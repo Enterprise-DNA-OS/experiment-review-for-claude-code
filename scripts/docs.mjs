@@ -1,48 +1,23 @@
 #!/usr/bin/env node
-// `npm run docs` renders the paperwork this industry has to produce (statements,
-// notices, letters, claims, reports) from the data, in your brand, into ./docs-out/.
-// One HTML file per record. Print to PDF from the browser, or attach as is.
-//
-// Documents are declared in documents.json:
-//   [{ "name": "owner-statement", "title": "Owner statement", "for_each": "select id, name from owners",
-//      "file": "name",                                  // column of for_each used in the file name
-//      "sections": [{ "title": "Rent received", "sql": "select ... where owner_id = $1" }] }]
-// A section with layout: "record" renders its first row as labelled fields.
-// Every section query gets the record's `id` as $1.
-//
-//   npm run docs                       # every document, every record
-//   npm run docs -- owner-statement    # one document type
-//   npm run docs -- owner-statement <id-prefix>
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { getDb, REPO_ROOT } from './lib/db.mjs';
-import { page, table, record, writeOut } from './lib/render.mjs';
-
-const [only, idPrefix] = process.argv.slice(2);
-const spec = JSON.parse(readFileSync(path.join(REPO_ROOT, 'documents.json'), 'utf8'));
-const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-const db = await getDb();
-let count = 0;
-try {
-  await db.exec("BEGIN READ ONLY");
-  for (const d of spec) {
-    if (only && d.name !== only) continue;
-    const records = await db.query(d.for_each);
-    for (const r of records) {
-      if (idPrefix && !String(r.id).startsWith(idPrefix)) continue;
-      const sections = [];
-      for (const s of d.sections) {
-        const rows = await db.query(s.sql, [r.id]);
-        sections.push({ title: s.title, note: s.note, html: s.layout === 'record' ? record(rows[0], s.columns) : table(rows, s.columns) });
-      }
-      const label = r[d.file || 'id'];
-      const file = writeOut(path.join('docs-out', d.name), `${slug(label) || 'record'}-${r.id}`, page({ title: d.title, subtitle: String(label), sections }));
-      console.log(`doc: ${path.relative(REPO_ROOT, file)}`);
-      count++;
-    }
-  }
-  console.log(`${count} document(s) rendered`);
-} finally {
-  await db.exec("ROLLBACK");
-  await db.close();
-}
+import {getDb} from './lib/db.mjs';
+import {page,table,record,writeOut} from './lib/render.mjs';
+import {review} from './experiments.mjs';
+const db=await getDb();let count=0;
+try{
+ await db.exec('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+ for(const e of await db.query("select * from experiments where status<>'archived' order by code")){
+  const r=await review(db,e);
+  const decisions=await db.query('select outcome,actor,rationale,report_id,created_at from decisions where experiment_id=$1 order by sequence desc',[e.id]);
+  const rules=await db.query('select * from v_compliance where code=$1',[e.code]);
+  const plan={code:e.code,owner:e.owner,hypothesis:e.hypothesis,primary_goal:e.primary_goal,control_id:e.control_id,start_on:e.start_on,end_on:e.end_on,min_users:e.min_users,expected_control:e.expected_control,plan_locked:e.plan_locked,retrospective:e.retrospective};
+  writeOut('docs-out/brief',e.code,page({title:'Experiment brief',subtitle:e.name,sections:[{title:'Analysis plan',html:record(plan)},{title:'Privacy checks',html:table(rules)}]}));
+  writeOut('docs-out/readout',e.code,page({title:'Experiment decision readout',subtitle:e.name,sections:[
+   {title:r.eligible?'Ready for a human decision':'Hold for review',note:r.period||'No report imported',html:table(r.blocks.map(issue=>({issue})))},
+   {title:'Conversion differences',note:'Two-arm binary outcomes. Adjusted Wald 95% intervals. Other goals are exploratory. Percentage points, not relative percentages.',html:table(r.metrics.map(m=>({goal:m.goal,control_users:m.control_users,variant_users:m.variant_users,delta_pp:m.delta_pp,ci_low_pp:m.ci_low_pp,ci_high_pp:m.ci_high_pp})))},
+   {title:'Guardrails',note:'Observed changes against configured tolerances. These are not statistical proof of safety.',html:table(r.guardrails)},
+   {title:'Decision history',html:table(decisions)},
+   {title:'Evidence reference',html:record({report_id:r.report_id,segment:r.segment,srm_chi2:r.srm_chi2,retrospective:e.retrospective})}
+  ]}));count+=2;
+ }
+ console.log(`${count} branded documents rendered`);
+}finally{await db.exec('ROLLBACK');await db.close();}

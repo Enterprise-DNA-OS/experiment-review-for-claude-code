@@ -1,0 +1,23 @@
+{
+  "captured": "2026-11-07T02:55:00.420Z",
+  "screens": [
+    {
+      "title": "A result ready for a human decision",
+      "ask": "Does the shorter checkout have enough evidence for a review?",
+      "command": "npm run experiments -- results --ref=CHECKOUT",
+      "output": "CHECKOUT: Ready for human decision\n2026-10-08 to 2026-11-05\nAll configured checks passed.\n  goal              control_users  variant_users  delta_pp  ci_low_pp  ci_high_pp\n  ----------------  -------------  -------------  --------  ---------  ----------\n  Completed action  10000          10000          4.0000    3.1000     4.8984    \n  Support request   10000          10000          0.2000    -0.1983    0.5982    \nGuardrails:\n  goal_id  direction  tolerance_pp  delta_pp  breach\n  -------  ---------  ------------  --------  ------\n  support  lower      1             0.2000    false"
+    },
+    {
+      "title": "An apparent win that needs investigation",
+      "ask": "Why should we hold the delivery test?",
+      "command": "npm run experiments -- sample-check --ref=DELIVERY",
+      "output": "code      srm_chi2  eligible  blocks                                                                        \n  --------  --------  --------  ------------------------------------------------------------------------------\n  DELIVERY  529.4118  false     sample ratio mismatch; guardrail support: tolerance exceeded or invalid counts"
+    },
+    {
+      "title": "The Monday review list",
+      "ask": "Which experiments need attention this week?",
+      "command": "npm run experiments -- attention",
+      "output": "code      name              owner  issue                         due_on    \n  --------  ----------------  -----  ----------------------------  ----------\n  SIGNUP    Member signup     Aroha  report older than seven days  2026-10-28\n  CHECKOUT  Shorter checkout  Aroha  review overdue                2026-11-05\n  DELIVERY  Delivery promise  Ben    review overdue                2026-11-05\n  SEARCH    Search wording           analysis plan incomplete      2026-11-05\n  SEARCH    Search wording           no full-population report     2026-11-05\n  SEARCH    Search wording           owner missing                 2026-11-05\n  SEARCH    Search wording           review overdue                2026-11-05\n  SIGNUP    Member signup     Aroha  review overdue                2026-11-05"
+    }
+  ]
+}

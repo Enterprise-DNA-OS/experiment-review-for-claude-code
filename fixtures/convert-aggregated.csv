@@ -1,0 +1,5 @@
+experience_id,experience_name,variation_id,variation_name,goal_id,goal_name,users,conversions,revenue
+fixture-201,Delivery wording,A,Original,purchase,Purchase,10000,1000,50000
+fixture-201,Delivery wording,B,Revised,purchase,Purchase,10000,1400,70000
+fixture-201,Delivery wording,A,Original,support,Support requests,10000,200,0
+fixture-201,Delivery wording,B,Revised,support,Support requests,10000,220,0

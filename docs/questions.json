@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Which experiments need a decision this week?",
+    "command": "npm run experiments -- review-queue"
+  },
+  {
+    "question": "Which apparent improvement has uneven test groups?",
+    "command": "npm run experiments -- sample-check --ref=DELIVERY"
+  },
+  {
+    "question": "Which result covers less than the planned period?",
+    "command": "npm run experiments -- results --ref=SIGNUP"
+  },
+  {
+    "question": "Did support requests worsen beyond our agreed limit?",
+    "command": "npm run experiments -- guardrails --ref=DELIVERY"
+  },
+  {
+    "question": "Which experiment still has no owner?",
+    "command": "npm run experiments -- attention"
+  },
+  {
+    "question": "Which old reports are being used for an active review?",
+    "command": "npm run experiments -- attention"
+  },
+  {
+    "question": "What evidence supported the last human decision?",
+    "command": "npm run experiments -- decisions --ref=CHECKOUT"
+  },
+  {
+    "question": "Who changed the owner or recorded a review note?",
+    "command": "npm run experiments -- activity --ref=SEARCH"
+  },
+  {
+    "question": "Which privacy record reviews are due?",
+    "command": "npm run experiments -- compliance"
+  },
+  {
+    "question": "What is the difference between the two conversion rates?",
+    "command": "npm run experiments -- results --ref=CHECKOUT"
+  }
+]

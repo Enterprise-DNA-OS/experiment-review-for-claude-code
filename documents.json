@@ -1,11 +1,1 @@
-[
-  {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
-    "file": "name",
-    "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
-    ]
-  }
-]
+{"renderer":"scripts/docs.mjs","types":["experiment-brief","decision-readout"],"note":"Both use brand.json and read a consistent database snapshot."}

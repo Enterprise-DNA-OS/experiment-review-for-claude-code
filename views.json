@@ -1,14 +1,5 @@
 [
-  {
-    "name": "week",
-    "title": "This week",
-    "subtitle": "Experiment Review for Claude Code: what needs attention, rendered by npm run view",
-    "sections": [
-      {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
-      }
-    ]
-  }
+ {"name":"week","title":"Experiment review desk","subtitle":"Decisions, owners and missing evidence","sections":[{"title":"Experiments","sql":"select code,name,owner,status,end_on,plan_locked,reports,issues from v_portfolio order by code"},{"title":"Needs attention","sql":"select * from v_attention order by due_on,code"}]},
+ {"name":"workload","title":"Review workload","sections":[{"title":"By owner","sql":"select * from v_workload order by overdue desc,owner"},{"title":"Privacy record reminders","sql":"select * from v_compliance order by code,rule","note":"Record checks only. Review access and retention in the operating environment."}]},
+ {"name":"provenance","title":"Report provenance","sections":[{"title":"Latest report by population","sql":"select e.code,r.segment,r.start_on,r.end_on,r.source_file,r.source_hash,r.actor from v_latest_reports r join experiments e on e.id=r.experiment_id order by e.code,r.segment"},{"title":"Human decisions","sql":"select e.code,d.outcome,d.actor,d.rationale,d.created_at from decisions d join experiments e on e.id=d.experiment_id order by d.sequence desc"}]}
 ]
